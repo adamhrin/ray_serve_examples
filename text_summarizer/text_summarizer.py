@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from ray import serve
 import torch
+import logging
 
 # 1: Define a FastAPI app and wrap it in a deployment with a route handler.
 app = FastAPI()
+
+logger = logging.getLogger("ray.serve")
 
 @serve.deployment(
     route_prefix="/",
@@ -15,11 +18,11 @@ class SummaryDeployment:
     def __init__(self):
         from transformers import BartForConditionalGeneration, BartTokenizer
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(torch.cuda.is_available())
-        print(torch.device('cuda'))
-        print(torch.version.hip)
-        print(torch.cuda.get_device_name(0))
-        print(self.device)
+        logger.info(f"torch.cuda.is_available() {torch.cuda.is_available()}")
+        logger.info(f"torch.device('cuda') {torch.device('cuda')}")
+        logger.info(f"torch.version.hip {torch.version.hip}")
+        logger.info(f"torch.cuda.get_device_name(0) {torch.cuda.get_device_name(0)}")
+        logger.info(f"self.device {self.device}")
         model_name = "facebook/bart-large-cnn"
         self.tokenizer = BartTokenizer.from_pretrained(model_name)
         self.model = BartForConditionalGeneration.from_pretrained(model_name).to(
